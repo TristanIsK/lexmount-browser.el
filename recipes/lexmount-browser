@@ -1,0 +1,2 @@
+(lexmount-browser :fetcher github :repo "TristanIsK/lexmount-browser.el"
+                 :files ("lexmount-browser.el" "lexmount-browser-auth.el"))

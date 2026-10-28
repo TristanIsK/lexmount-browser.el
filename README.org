@@ -1,0 +1,114 @@
+#+title: LexMount Browser for Emacs
+
+An interactive Emacs client for the global [[https://browser.lexmount.com][LexMount cloud browser]], using
+[[https://github.com/lizqwerscott/mcp.el][mcp.el]] for MCP transport. Open a remote page, read its visible text, capture a
+screenshot, and open its live view for manual interaction, without an AI client.
+
+* Status
+
+Initial preview. Not yet available from MELPA. The recipe is included for review;
+inclusion requires approval by MELPA maintainers. Their current submission
+template requires at least one month of public maintenance. This repository was
+created on 2026-10-28, so 2026-11-28 is the earliest calendar eligibility date,
+not a promised acceptance date. Local regression tests do not
+establish that an account has completed the production OAuth/browser journey.
+
+* Requirements
+
+- Emacs 30.1 or later, with HTTPS support.
+- =mcp= 0.1.0 or later (available from MELPA).
+- =openssl= on Emacs's =exec-path=, for cryptographically secure PKCE randomness.
+- A LexMount global-service account with available cloud-browser quota.
+- A local system browser and free loopback port 8976 for OAuth.
+
+The package is free software; the hosted browser service has its own account,
+pricing, quota, and privacy terms. Browsing runs on LexMount infrastructure.
+This release uses =browser.lexmount.com= only. Regional credentials are not
+interchangeable. A terminal Emacs over SSH needs browser access to that Emacs
+host's loopback callback (for example an explicitly configured SSH tunnel).
+
+* Install from source
+
+Install =mcp= with =M-x package-install RET mcp RET= after configuring MELPA.
+Clone this repository and add its directory to your load path:
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "/path/to/lexmount-browser.el")
+(require 'lexmount-browser)
+#+end_src
+
+No =package-install lexmount-browser= command is advertised until MELPA accepts
+and builds the recipe.
+
+* First browser session
+
+1. Run =M-x lexmount-browser-login= and authorize in your system browser.
+2. Wait for the Emacs message "LexMount connected".
+3. Run =M-x lexmount-browser-create=.
+4. Press =o= and enter =https://example.com=.
+5. Press =r= and confirm that "Example Domain" appears.
+6. Press =s= to capture a screenshot; =w= saves the PNG. Terminal Emacs can save
+   screenshots even when it cannot display images inline.
+7. Press =k= and confirm to close the remote browser.
+
+| Key | Command | Purpose |
+|-----+---------+---------|
+| o | lexmount-browser-open-url | Navigate the current session |
+| r | lexmount-browser-read | Read up to 50,000 characters of body text |
+| s | lexmount-browser-screenshot | Capture a PNG |
+| w | lexmount-browser-save-screenshot | Save the captured PNG |
+| v | lexmount-browser-view | Open the remote live view in a system browser |
+| g | lexmount-browser-status | Read the current session status |
+| k | lexmount-browser-close | Close the remote browser after confirmation |
+| q | quit-window | Hide the Emacs buffer; keep the remote browser alive |
+
+Use =M-x lexmount-browser-list= to inspect the first 100 sessions, then
+=M-x lexmount-browser-attach= with an existing session ID. Creating a browser
+does not enumerate other sessions. Each attached session has its own buffer.
+
+Website login is separate from LexMount service authorization. Use =v= for
+website login, QR verification, and other manual work. Finish there, then press
+=r= to read fresh page state. This package does not embed an MCP App iframe.
+
+* Credentials and failures
+
+Tokens are held only in Emacs memory and expire according to the server response.
+The global authorization server currently advertises the authorization-code
+grant, not refresh-token support. Log in again after expiry or restarting Emacs.
+=M-x lexmount-browser-auth-cancel= cancels a pending login. The loopback listener
+binds only to 127.0.0.1, waits for five minutes, and validates OAuth state and PKCE.
+
+=M-x lexmount-browser-logout= forgets local credentials and disconnects MCP. It
+does not revoke the server grant or close remote browser sessions. Close sessions
+first when they are no longer needed. Old session buffers cannot issue requests
+using a later login; attach the session again after the server verifies access.
+
+Tool calls are never retried automatically. If a create or close request times
+out, it may have completed remotely. Check status or list sessions before trying
+again. Closing a buffer or quitting Emacs also does not close its remote browser.
+Buffers and screenshots can contain private website content and session links.
+
+* Development
+
+#+begin_src sh
+make bootstrap
+make check
+#+end_src
+
+=bootstrap= downloads dependencies from GNU ELPA and MELPA into =.deps/=.
+=check= runs ERT, warning-free byte compilation, checkdoc, and package-lint.
+No real account credentials are used by these checks. The separate local HTTP
+fixture exercises the public commands through the real mcp.el transport.
+
+The proposed recipe is =recipes/lexmount-browser=. Only the two package source
+files are shipped; tests, client metadata, and this README stay in the repository.
+Keep =oauth-client.json= at its public URL: it is the OAuth client's identity.
+
+Surface parity: the gateway, web UI, backend API, and CLI/runtime packages are
+unaffected. This repository adds an Emacs client using the existing MCP contract.
+
+* License and maintenance
+
+GPL-3.0-or-later. Maintainer: [[https://github.com/TristanIsK][TristanIsK]].
+Code was assisted by Codex (GPT-6); source headers include the Assisted-by field
+requested by MELPA. Human maintainer review remains part of submission readiness.

@@ -1,0 +1,20 @@
+name: Emacs package checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        emacs_version: ['30.2', '31.1']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
+      - run: make bootstrap
+      - run: make check
+      - run: make http-test
