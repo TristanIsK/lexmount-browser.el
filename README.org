@@ -10,8 +10,8 @@ Initial preview. Not yet available from MELPA. The recipe is included for review
 inclusion requires approval by MELPA maintainers. Their current submission
 template requires at least one month of public maintenance. This repository was
 created on 2026-10-28, so 2026-11-28 is the earliest calendar eligibility date,
-not a promised acceptance date. Local regression tests do not
-establish that an account has completed the production OAuth/browser journey.
+not a promised acceptance date. The production OAuth and browser journey was exercised on 2026-10-28; see
+=VALIDATION.md= for the exact evidence and remaining limits.
 
 * Requirements
 
@@ -26,6 +26,12 @@ pricing, quota, and privacy terms. Browsing runs on LexMount infrastructure.
 This release uses =browser.lexmount.com= only. Regional credentials are not
 interchangeable. A terminal Emacs over SSH needs browser access to that Emacs
 host's loopback callback (for example an explicitly configured SSH tunnel).
+
+* Install the preview archive
+
+Download =lexmount-browser-0.1.0.tar= from the
+[[https://github.com/TristanIsK/lexmount-browser.el/releases/tag/v0.1.0][v0.1.0 preview release]], then run =M-x package-install-file= and select it.
+Configure MELPA first so package.el can install the =mcp= dependency.
 
 * Install from source
 
@@ -46,7 +52,7 @@ and builds the recipe.
 2. Wait for the Emacs message "LexMount connected".
 3. Run =M-x lexmount-browser-create=.
 4. Press =o= and enter =https://example.com=.
-5. Press =r= and confirm that "Example Domain" appears.
+5. Press =r= and confirm that the page's current documentation-domain explanation appears.
 6. Press =s= to capture a screenshot; =w= saves the PNG. Terminal Emacs can save
    screenshots even when it cannot display images inline.
 7. Press =k= and confirm to close the remote browser.
@@ -93,6 +99,7 @@ Buffers and screenshots can contain private website content and session links.
 #+begin_src sh
 make bootstrap
 make check
+make http-test
 #+end_src
 
 =bootstrap= downloads dependencies from GNU ELPA and MELPA into =.deps/=.
